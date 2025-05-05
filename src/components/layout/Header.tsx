@@ -10,9 +10,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Bell, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 const Header = ({ title }: { title: string }) => {
   const { collapsed, toggleSidebar, isMobile } = useSidebar();
+  const navigate = useNavigate();
 
   return (
     <header className={`sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background px-2 sm:px-4 md:px-6 ${collapsed ? "lg:ml-16" : "lg:ml-64"} transition-all duration-300`}>
@@ -69,7 +71,7 @@ const Header = ({ title }: { title: string }) => {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/profile')}>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Logout</DropdownMenuItem>

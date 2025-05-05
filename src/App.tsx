@@ -19,6 +19,7 @@ import NotificationDeliveries from './pages/NotificationDeliveries';
 import ProductUsage from './pages/ProductUsage';
 import AuditLogs from './pages/AuditLogs';
 import SignIn from './pages/SignIn';
+import Profile from './pages/Profile';
 import { supabase } from "@/lib/supabaseClient";
 
 // Update the title in the document
@@ -81,6 +82,7 @@ const App = () => (
                     <Route path="/audit-logs" element={<AuditLogs />} />
                     <Route path="/sms-notifications" element={<SMSNotifications />} />
                     <Route path="/push-notifications" element={<PushNotifications />} />
+                    <Route path="/profile" element={<Profile />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Layout>

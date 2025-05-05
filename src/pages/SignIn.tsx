@@ -34,6 +34,11 @@ const SignIn = () => {
       setError(error.message);
       toast({ title: "Sign In Failed", description: error.message, variant: "destructive" });
     } else {
+      // Update last_login timestamp for this user
+      await supabase
+        .from('users')
+        .update({ last_login: new Date().toISOString() })
+        .eq('email', email);
       window.location.href = "/";
     }
   };
@@ -43,6 +48,10 @@ const SignIn = () => {
     setLoading(true);
     setError("");
     const { error } = await supabase.auth.signUp({ email, password });
+    if (!error) {
+      // Insert into users table
+      await supabase.from('users').insert([{ email, status: 'active', name: '' }]);
+    }
     setLoading(false);
     if (error) {
       setError(error.message);
