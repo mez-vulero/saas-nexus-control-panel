@@ -40,6 +40,23 @@ import { Label } from "@/components/ui/label";
 import { User, Mail, Plus, Search, Filter, Phone, CheckCheck, X } from "lucide-react";
 import { useState } from "react";
 
+// Define the User type to fix TypeScript errors
+interface UserSubscription {
+  productName: string;
+  [key: string]: any; // For other properties in the subscription
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  status: string;
+  createdAt: string;
+  lastLogin: string;
+  subscriptions?: UserSubscription[]; // Make it optional with proper typing
+  phone?: string; // Make it optional
+}
+
 const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString();
 };

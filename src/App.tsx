@@ -13,6 +13,9 @@ import SMSNotifications from "./pages/SMSNotifications";
 import PushNotifications from "./pages/PushNotifications";
 import NotFound from "./pages/NotFound";
 
+// Update the title in the document
+document.title = "Vulero - SaaS Management Platform";
+
 const queryClient = new QueryClient();
 
 const App = () => (
