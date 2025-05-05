@@ -24,6 +24,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { FileText, Plus, Search, Calendar, DollarSign, User, Receipt, Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { useState } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const fetchInvoices = async () => {
   const { data, error } = await supabase
@@ -237,47 +244,35 @@ const Invoices = () => {
           </Dialog>
         </div>
         {/* Advanced Filters */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <div className="relative w-40">
-            <User className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="User ID" value={columnFilters.user_id} onChange={e => setColumnFilters(f => ({ ...f, user_id: e.target.value }))} className="pl-8" />
-          </div>
-          <div className="relative w-40">
-            <Receipt className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Subscription ID" value={columnFilters.subscription_id} onChange={e => setColumnFilters(f => ({ ...f, subscription_id: e.target.value }))} className="pl-8" />
-          </div>
-          <div className="relative w-32">
-            <DollarSign className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Amount" value={columnFilters.amount} onChange={e => setColumnFilters(f => ({ ...f, amount: e.target.value }))} className="pl-8" />
-          </div>
-          <div className="relative w-32">
-            <Badge className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Status" value={columnFilters.status} onChange={e => setColumnFilters(f => ({ ...f, status: e.target.value }))} className="pl-8" />
-          </div>
-          <div className="relative w-40">
-            <Calendar className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input type="date" placeholder="Issued At" value={columnFilters.issued_at} onChange={e => setColumnFilters(f => ({ ...f, issued_at: e.target.value }))} className="pl-8" />
-          </div>
-          <div className="relative w-40">
-            <Calendar className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input type="date" placeholder="Paid At" value={columnFilters.paid_at} onChange={e => setColumnFilters(f => ({ ...f, paid_at: e.target.value }))} className="pl-8" />
+        <div className="flex flex-wrap gap-2 mb-4 flex-col sm:flex-row">
+          <div className="relative w-full sm:w-40">
+            <Label htmlFor="filter-status" className="text-xs absolute left-2 top-1">Status</Label>
+            <Select value={columnFilters.status} onValueChange={v => setColumnFilters(f => ({ ...f, status: v }))}>
+              <SelectTrigger className="mt-5 w-full"><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="unpaid">Unpaid</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         {/* Sorting UI */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex flex-col sm:flex-row items-center gap-2 mb-4">
           <label>Sort by:</label>
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="border px-2 py-1 rounded">
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="border px-2 py-1 rounded w-full sm:w-auto">
             <option value="date">Date</option>
             <option value="amount">Amount</option>
           </select>
-          <button type="button" onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')} className="border px-2 py-1 rounded flex items-center gap-1">
+          <button type="button" onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')} className="border px-2 py-1 rounded flex items-center gap-1 w-full sm:w-auto">
             {sortOrder === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
             {sortOrder === 'asc' ? 'Asc' : 'Desc'}
           </button>
         </div>
       </div>
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-md border overflow-x-auto">
+        <Table className="min-w-[600px]">
           <TableHeader>
             <TableRow>
               <TableHead><FileText className="inline mr-1 h-4 w-4" />ID</TableHead>

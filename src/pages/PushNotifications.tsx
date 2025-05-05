@@ -134,14 +134,14 @@ const PushNotifications = () => {
           </div>
         </div>
         {/* Filter Bar (replaces DropdownMenu) */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <div className="relative w-40">
+        <div className="flex flex-wrap gap-2 mb-4 flex-col sm:flex-row">
+          <div className="relative w-full sm:w-40">
             <Label htmlFor="filter-product" className="text-xs absolute left-2 top-1">Product</Label>
             <Select
               value={filters.product}
               onValueChange={(value) => setFilters({ ...filters, product: value })}
             >
-              <SelectTrigger id="filter-product" className="mt-5">
+              <SelectTrigger id="filter-product" className="mt-5 w-full">
                 <SelectValue placeholder="Select product" />
               </SelectTrigger>
               <SelectContent>
@@ -154,13 +154,13 @@ const PushNotifications = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="relative w-40">
+          <div className="relative w-full sm:w-40">
             <Label htmlFor="filter-type" className="text-xs absolute left-2 top-1">Type</Label>
             <Select
               value={filters.type}
               onValueChange={(value) => setFilters({ ...filters, type: value })}
             >
-              <SelectTrigger id="filter-type" className="mt-5">
+              <SelectTrigger id="filter-type" className="mt-5 w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
@@ -173,13 +173,13 @@ const PushNotifications = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="relative w-40">
+          <div className="relative w-full sm:w-40">
             <Label htmlFor="filter-status" className="text-xs absolute left-2 top-1">Status</Label>
             <Select
               value={filters.status}
               onValueChange={(value) => setFilters({ ...filters, status: value })}
             >
-              <SelectTrigger id="filter-status" className="mt-5">
+              <SelectTrigger id="filter-status" className="mt-5 w-full">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
@@ -195,7 +195,7 @@ const PushNotifications = () => {
           <Button
             variant="outline"
             onClick={resetFilters}
-            className="h-10 mt-5"
+            className="h-10 mt-5 w-full sm:w-auto"
             disabled={!activeFilterCount}
           >
             <X className="mr-2 h-4 w-4" />
@@ -240,7 +240,7 @@ const PushNotifications = () => {
       </div>
 
       <div className="rounded-md border overflow-x-auto">
-        <Table>
+        <Table className="min-w-[600px]">
           <TableHeader>
             <TableRow>
               <TableHead>Push Details</TableHead>

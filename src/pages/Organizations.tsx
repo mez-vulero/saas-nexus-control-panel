@@ -192,31 +192,31 @@ const Organizations = () => {
           </Dialog>
         </div>
         {/* Advanced Filters */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <div className="relative w-40">
-            <Building2 className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Name" value={columnFilters.name} onChange={e => setColumnFilters(f => ({ ...f, name: e.target.value }))} className="pl-8" />
+        <div className="flex flex-wrap gap-2 mb-4 flex-col sm:flex-row">
+          <div className="relative w-full sm:w-40">
+            <Label htmlFor="filter-name" className="text-xs absolute left-2 top-1">Name</Label>
+            <Input placeholder="Name" value={columnFilters.name} onChange={e => setColumnFilters(f => ({ ...f, name: e.target.value }))} className="pl-8 mt-5 w-full" />
           </div>
-          <div className="relative w-40">
-            <Calendar className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input type="date" placeholder="Created At" value={columnFilters.created_at} onChange={e => setColumnFilters(f => ({ ...f, created_at: e.target.value }))} className="pl-8" />
+          <div className="relative w-full sm:w-40">
+            <Label htmlFor="filter-created-at" className="text-xs absolute left-2 top-1">Created At</Label>
+            <Input type="date" placeholder="Created At" value={columnFilters.created_at} onChange={e => setColumnFilters(f => ({ ...f, created_at: e.target.value }))} className="pl-8 mt-5 w-full" />
           </div>
         </div>
         {/* Sorting UI */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex flex-col sm:flex-row items-center gap-2 mb-4">
           <label>Sort by:</label>
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="border px-2 py-1 rounded">
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="border px-2 py-1 rounded w-full sm:w-auto">
             <option value="name">Name</option>
             <option value="date">Date</option>
           </select>
-          <button type="button" onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')} className="border px-2 py-1 rounded flex items-center gap-1">
+          <button type="button" onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')} className="border px-2 py-1 rounded flex items-center gap-1 w-full sm:w-auto">
             {sortOrder === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
             {sortOrder === 'asc' ? 'Asc' : 'Desc'}
           </button>
         </div>
       </div>
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-md border overflow-x-auto">
+        <Table className="min-w-[600px]">
           <TableHeader>
             <TableRow>
               <TableHead><Building2 className="inline mr-1 h-4 w-4" />ID</TableHead>

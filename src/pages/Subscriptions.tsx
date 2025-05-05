@@ -139,14 +139,14 @@ const Subscriptions = () => {
           </div>
         </div>
         {/* Filter Bar (replaces DropdownMenu) */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <div className="relative w-40">
+        <div className="flex flex-wrap gap-2 mb-4 flex-col sm:flex-row">
+          <div className="relative w-full sm:w-40">
             <Label htmlFor="filter-product" className="text-xs absolute left-2 top-1">Product</Label>
             <Select
               value={filters.product}
               onValueChange={(value) => setFilters({ ...filters, product: value })}
             >
-              <SelectTrigger id="filter-product" className="mt-5">
+              <SelectTrigger id="filter-product" className="mt-5 w-full">
                 <SelectValue placeholder="Select product" />
               </SelectTrigger>
               <SelectContent>
@@ -159,13 +159,13 @@ const Subscriptions = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="relative w-40">
+          <div className="relative w-full sm:w-40">
             <Label htmlFor="filter-plan" className="text-xs absolute left-2 top-1">Plan</Label>
             <Select
               value={filters.plan}
               onValueChange={(value) => setFilters({ ...filters, plan: value })}
             >
-              <SelectTrigger id="filter-plan" className="mt-5">
+              <SelectTrigger id="filter-plan" className="mt-5 w-full">
                 <SelectValue placeholder="Select plan" />
               </SelectTrigger>
               <SelectContent>
@@ -178,13 +178,13 @@ const Subscriptions = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="relative w-40">
+          <div className="relative w-full sm:w-40">
             <Label htmlFor="filter-status" className="text-xs absolute left-2 top-1">Status</Label>
             <Select
               value={filters.status}
               onValueChange={(value) => setFilters({ ...filters, status: value })}
             >
-              <SelectTrigger id="filter-status" className="mt-5">
+              <SelectTrigger id="filter-status" className="mt-5 w-full">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
@@ -197,13 +197,13 @@ const Subscriptions = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="relative w-40">
+          <div className="relative w-full sm:w-40">
             <Label htmlFor="filter-interval" className="text-xs absolute left-2 top-1">Interval</Label>
             <Select
               value={filters.interval}
               onValueChange={(value) => setFilters({ ...filters, interval: value })}
             >
-              <SelectTrigger id="filter-interval" className="mt-5">
+              <SelectTrigger id="filter-interval" className="mt-5 w-full">
                 <SelectValue placeholder="Select interval" />
               </SelectTrigger>
               <SelectContent>
@@ -219,7 +219,7 @@ const Subscriptions = () => {
           <Button
             variant="outline"
             onClick={resetFilters}
-            className="h-10 mt-5"
+            className="h-10 mt-5 w-full sm:w-auto"
             disabled={!activeFilterCount}
           >
             <X className="mr-2 h-4 w-4" />
@@ -274,7 +274,7 @@ const Subscriptions = () => {
       </div>
 
       <div className="rounded-md border overflow-x-auto">
-        <Table>
+        <Table className="min-w-[600px]">
           <TableHeader>
             <TableRow>
               <TableHead>User</TableHead>

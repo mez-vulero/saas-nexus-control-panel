@@ -152,12 +152,12 @@ const Roles = () => {
               placeholder="Search roles..."
               value={columnFilters.name}
               onChange={(e) => setColumnFilters({ ...columnFilters, name: e.target.value })}
-              className="pl-8"
+              className="pl-8 w-full"
             />
           </div>
           <Dialog open={modalOpen} onOpenChange={setModalOpen}>
             <DialogTrigger asChild>
-              <Button className="shrink-0" onClick={openAdd}>
+              <Button className="shrink-0 w-full sm:w-auto" onClick={openAdd}>
                 <Plus className="mr-2 h-4 w-4" /> Add Role
               </Button>
             </DialogTrigger>
@@ -183,17 +183,17 @@ const Roles = () => {
           </Dialog>
         </div>
         {/* Sorting UI */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex flex-col sm:flex-row items-center gap-2 mb-4">
           <label>Sort by:</label>
           <span>Name</span>
-          <button type="button" onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')} className="border px-2 py-1 rounded flex items-center gap-1">
+          <button type="button" onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')} className="border px-2 py-1 rounded flex items-center gap-1 w-full sm:w-auto">
             {sortOrder === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
             {sortOrder === 'asc' ? 'Asc' : 'Desc'}
           </button>
         </div>
       </div>
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-md border overflow-x-auto">
+        <Table className="min-w-[400px]">
           <TableHeader>
             <TableRow>
               <TableHead><UserCog className="inline mr-1 h-4 w-4" />ID</TableHead>

@@ -220,40 +220,40 @@ const AuditLogs = () => {
           </Dialog>
         </div>
         {/* Advanced Filters */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <div className="relative w-32">
+        <div className="flex flex-wrap gap-2 mb-4 flex-col sm:flex-row">
+          <div className="relative w-full sm:w-32">
             <User className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="User ID" value={columnFilters.user_id} onChange={e => setColumnFilters(f => ({ ...f, user_id: e.target.value }))} className="pl-8" />
+            <Input placeholder="User ID" value={columnFilters.user_id} onChange={e => setColumnFilters(f => ({ ...f, user_id: e.target.value }))} className="pl-8 w-full" />
           </div>
-          <div className="relative w-32">
+          <div className="relative w-full sm:w-32">
             <FileText className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Action" value={columnFilters.action} onChange={e => setColumnFilters(f => ({ ...f, action: e.target.value }))} className="pl-8" />
+            <Input placeholder="Action" value={columnFilters.action} onChange={e => setColumnFilters(f => ({ ...f, action: e.target.value }))} className="pl-8 w-full" />
           </div>
-          <div className="relative w-32">
+          <div className="relative w-full sm:w-32">
             <Database className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Entity Type" value={columnFilters.entity_type} onChange={e => setColumnFilters(f => ({ ...f, entity_type: e.target.value }))} className="pl-8" />
+            <Input placeholder="Entity Type" value={columnFilters.entity_type} onChange={e => setColumnFilters(f => ({ ...f, entity_type: e.target.value }))} className="pl-8 w-full" />
           </div>
-          <div className="relative w-32">
+          <div className="relative w-full sm:w-32">
             <Hash className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Entity ID" value={columnFilters.entity_id} onChange={e => setColumnFilters(f => ({ ...f, entity_id: e.target.value }))} className="pl-8" />
+            <Input placeholder="Entity ID" value={columnFilters.entity_id} onChange={e => setColumnFilters(f => ({ ...f, entity_id: e.target.value }))} className="pl-8 w-full" />
           </div>
-          <div className="relative w-40">
+          <div className="relative w-full sm:w-40">
             <Calendar className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
-            <Input type="date" placeholder="Created At" value={columnFilters.created_at} onChange={e => setColumnFilters(f => ({ ...f, created_at: e.target.value }))} className="pl-8" />
+            <Input type="date" placeholder="Created At" value={columnFilters.created_at} onChange={e => setColumnFilters(f => ({ ...f, created_at: e.target.value }))} className="pl-8 w-full" />
           </div>
         </div>
         {/* Sorting UI */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex flex-col sm:flex-row items-center gap-2 mb-4">
           <label>Sort by:</label>
           <span>Date</span>
-          <button type="button" onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')} className="border px-2 py-1 rounded flex items-center gap-1">
+          <button type="button" onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')} className="border px-2 py-1 rounded flex items-center gap-1 w-full sm:w-auto">
             {sortOrder === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
             {sortOrder === 'asc' ? 'Asc' : 'Desc'}
           </button>
         </div>
       </div>
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-md border overflow-x-auto">
+        <Table className="min-w-[800px]">
           <TableHeader>
             <TableRow>
               <TableHead><ListChecks className="inline mr-1 h-4 w-4" />ID</TableHead>

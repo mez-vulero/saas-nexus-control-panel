@@ -15,7 +15,7 @@ const TITLES: Record<string, string> = {
 };
 
 const LayoutContent = ({ children }: { children: React.ReactNode }) => {
-  const { collapsed } = useSidebar();
+  const { collapsed, isMobile } = useSidebar();
   const location = useLocation();
   const title = TITLES[location.pathname] || "Not Found";
 
@@ -25,14 +25,14 @@ const LayoutContent = ({ children }: { children: React.ReactNode }) => {
   }, [location]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col lg:block">
       <Sidebar />
       <div className="flex flex-col">
         <Header title={title} />
         <main
           className={cn(
-            "flex-1 transition-all duration-300 p-4 md:p-6",
-            collapsed ? "lg:ml-16" : "lg:ml-64"
+            "flex-1 transition-all duration-300 p-2 sm:p-4 md:p-6",
+            isMobile ? "ml-0" : (collapsed ? "lg:ml-16" : "lg:ml-64")
           )}
         >
           {children}

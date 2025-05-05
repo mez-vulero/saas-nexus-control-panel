@@ -246,29 +246,29 @@ const Users = () => {
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8"
+              className="pl-8 w-full"
             />
           </div>
         </div>
         {/* Filter Bar (replaces DropdownMenu) */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <div className="relative w-40">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 mb-4">
+          <div className="relative w-full sm:w-40">
             <Label htmlFor="filter-email" className="text-xs absolute left-2 top-1">Email</Label>
             <Input
               id="filter-email"
               placeholder="Filter by email"
               value={filters.email}
               onChange={(e) => setFilters({ ...filters, email: e.target.value })}
-              className="mt-5"
+              className="mt-5 w-full"
             />
           </div>
-          <div className="relative w-40">
+          <div className="relative w-full sm:w-40">
             <Label htmlFor="filter-product" className="text-xs absolute left-2 top-1">Product</Label>
             <Select
               value={filters.product}
               onValueChange={(value) => setFilters({ ...filters, product: value })}
             >
-              <SelectTrigger id="filter-product" className="mt-5">
+              <SelectTrigger id="filter-product" className="mt-5 w-full">
                 <SelectValue placeholder="Select product" />
               </SelectTrigger>
               <SelectContent>
@@ -281,23 +281,23 @@ const Users = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="relative w-40">
+          <div className="relative w-full sm:w-40">
             <Label htmlFor="filter-phone" className="text-xs absolute left-2 top-1">Phone</Label>
             <Input
               id="filter-phone"
               placeholder="Filter by phone"
               value={filters.phone}
               onChange={(e) => setFilters({ ...filters, phone: e.target.value })}
-              className="mt-5"
+              className="mt-5 w-full"
             />
           </div>
-          <div className="relative w-40">
+          <div className="relative w-full sm:w-40">
             <Label htmlFor="filter-status" className="text-xs absolute left-2 top-1">Status</Label>
             <Select
               value={filters.status}
               onValueChange={(value) => setFilters({ ...filters, status: value })}
             >
-              <SelectTrigger id="filter-status" className="mt-5">
+              <SelectTrigger id="filter-status" className="mt-5 w-full">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
@@ -310,7 +310,7 @@ const Users = () => {
           <Button
             variant="outline"
             onClick={resetFilters}
-            className="h-10 mt-5"
+            className="h-10 mt-5 w-full sm:w-auto"
             disabled={!activeFilterCount}
           >
             <X className="mr-2 h-4 w-4" />
@@ -364,7 +364,7 @@ const Users = () => {
         )}
       </div>
       <div className="rounded-md border overflow-x-auto">
-        <Table>
+        <Table className="min-w-[600px]">
           <TableHeader>
             <TableRow>
               <TableHead><UserIcon className="inline mr-1 h-4 w-4" />User</TableHead>
