@@ -1,4 +1,3 @@
-
 import { users } from "@/mock/mockData";
 import {
   Table,
@@ -53,8 +52,8 @@ interface User {
   status: string;
   createdAt: string;
   lastLogin: string;
-  subscriptions?: UserSubscription[]; // Make it optional with proper typing
-  phone?: string; // Make it optional
+  subscriptions?: UserSubscription[]; // Include subscriptions property
+  phone?: string; // Include phone property
 }
 
 const formatDate = (dateStr: string) => {

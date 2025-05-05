@@ -1,4 +1,3 @@
-
 export type User = {
   id: string;
   name: string;
@@ -6,6 +5,11 @@ export type User = {
   status: "active" | "inactive";
   createdAt: string;
   lastLogin: string;
+  phone?: string; // Added phone field
+  subscriptions?: { // Added subscriptions field
+    productName: string;
+    [key: string]: any;
+  }[];
 };
 
 export type Product = {
@@ -55,6 +59,14 @@ export const users: User[] = Array.from({ length: 20 }, (_, i) => {
     ).toISOString();
   };
 
+  // Generate a random phone number
+  const generatePhoneNumber = () => {
+    const areaCode = Math.floor(Math.random() * 900) + 100;
+    const prefix = Math.floor(Math.random() * 900) + 100;
+    const lineNumber = Math.floor(Math.random() * 9000) + 1000;
+    return `+1 (${areaCode}) ${prefix}-${lineNumber}`;
+  };
+
   return {
     id,
     name: `User ${id}`,
@@ -62,6 +74,7 @@ export const users: User[] = Array.from({ length: 20 }, (_, i) => {
     status: statuses[Math.floor(Math.random() * statuses.length)],
     createdAt: randomDate(new Date(2022, 0, 1), new Date()),
     lastLogin: randomDate(new Date(2023, 0, 1), new Date()),
+    phone: generatePhoneNumber(), // Add phone number to all users
   };
 });
 
@@ -119,6 +132,9 @@ const intervals = ["monthly", "annual"] as const;
 users.forEach((user) => {
   const numSubs = Math.floor(Math.random() * 3) + 1; // 1-3 subscriptions per user
   
+  // Create an array to store subscriptions for each user
+  const userSubscriptions = [];
+  
   for (let i = 0; i < numSubs; i++) {
     if (i < products.filter(p => p.status === "active").length) {
       const product = products[i % products.length];
@@ -141,7 +157,7 @@ users.forEach((user) => {
       if (plan === "enterprise") amount = 99.99;
       if (interval === "annual") amount *= 10; // 2 months free for annual
       
-      subscriptions.push({
+      const subscription = {
         id: `s-${subscriptions.length.toString().padStart(3, "0")}`,
         userId: user.id,
         userName: user.name,
@@ -154,9 +170,25 @@ users.forEach((user) => {
         endDate: endDate.toISOString(),
         amount,
         interval
+      };
+      
+      subscriptions.push(subscription);
+      
+      // Add to user's subscriptions array
+      userSubscriptions.push({
+        productName: product.name,
+        plan,
+        status,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        amount,
+        interval
       });
     }
   }
+  
+  // Add the subscriptions to the user
+  user.subscriptions = userSubscriptions;
 });
 
 // Generate mock SMS notifications
