@@ -1,4 +1,6 @@
-import { users } from "@/mock/mockData";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
+import { useToast } from '@/components/ui/use-toast';
 import {
   Table,
   TableBody,
@@ -36,7 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { User, Mail, Plus, Search, Filter, Phone, CheckCheck, X } from "lucide-react";
+import { User, Mail, Plus, Search, Filter, Phone, CheckCheck, X, User as UserIcon, Calendar, Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { useState } from "react";
 
 // Define the User type to fix TypeScript errors
@@ -60,6 +62,38 @@ const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString();
 };
 
+const fetchUsers = async () => {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  // Map snake_case to camelCase for createdAt and lastLogin
+  return (data || []).map(user => ({
+    ...user,
+    createdAt: user.created_at,
+    lastLogin: user.last_login,
+  }));
+};
+
+const createUser = async (user) => {
+  const { data, error } = await supabase.from('users').insert([user]).select().single();
+  if (error) throw error;
+  return data;
+};
+
+const updateUser = async ({ id, ...user }) => {
+  const { data, error } = await supabase.from('users').update(user).eq('id', id).select().single();
+  if (error) throw error;
+  return data;
+};
+
+const deleteUser = async (id) => {
+  const { error } = await supabase.from('users').delete().eq('id', id);
+  if (error) throw error;
+  return id;
+};
+
 const Users = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
@@ -69,37 +103,62 @@ const Users = () => {
     status: "",
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editUser, setEditUser] = useState(null);
+  const [form, setForm] = useState({ name: '', email: '', status: 'active', phone: '' });
+  const [deleteId, setDeleteId] = useState(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  // Add filter state for all major columns
+  const [columnFilters, setColumnFilters] = useState({
+    name: '',
+    email: '',
+    status: '',
+    phone: '',
+    createdAt: '',
+    lastLogin: '',
+  });
+
+  // Add sorting state
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  const { data: users = [], isLoading, error } = useQuery({
+    queryKey: ['users'],
+    queryFn: fetchUsers,
+  });
 
   // Get unique product names from users
   const products = Array.from(
     new Set(users.flatMap((user) => user.subscriptions?.map(sub => sub.productName) || []))
   ).filter(Boolean);
 
-  // Apply all filters
+  // Update filteredUsers to use 'all' as no filter
   const filteredUsers = users.filter((user) => {
-    // Search filter (name or email)
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Email filter
-    const matchesEmail = !filters.email || 
-      user.email.toLowerCase().includes(filters.email.toLowerCase());
-    
-    // Product filter
-    const matchesProduct = !filters.product || 
-      user.subscriptions?.some(sub => 
-        sub.productName.toLowerCase() === filters.product.toLowerCase()
-      );
-    
-    // Phone filter
-    const matchesPhone = !filters.phone || 
-      (user.phone && user.phone.includes(filters.phone));
-    
-    // Status filter
-    const matchesStatus = !filters.status || user.status === filters.status;
+    const matchesName = !columnFilters.name || user.name.toLowerCase().includes(columnFilters.name.toLowerCase());
+    const matchesEmail = !columnFilters.email || user.email.toLowerCase().includes(columnFilters.email.toLowerCase());
+    const matchesStatus = filters.status === "all" || !filters.status || user.status === filters.status;
+    const matchesPhone = !columnFilters.phone || (user.phone && user.phone.includes(columnFilters.phone));
+    const matchesCreatedAt = !columnFilters.createdAt || (user.createdAt && user.createdAt.startsWith(columnFilters.createdAt));
+    const matchesLastLogin = !columnFilters.lastLogin || (user.lastLogin && user.lastLogin.startsWith(columnFilters.lastLogin));
+    const matchesProduct = filters.product === "all" || !filters.product || (user.subscriptions && user.subscriptions.some(sub => sub.productName === filters.product));
+    return matchesName && matchesEmail && matchesStatus && matchesPhone && matchesCreatedAt && matchesLastLogin && matchesProduct;
+  });
 
-    return matchesSearch && matchesEmail && matchesProduct && matchesPhone && matchesStatus;
+  // Sort filteredUsers
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    let aValue, bValue;
+    if (sortBy === 'name') {
+      aValue = a.name?.toLowerCase() || '';
+      bValue = b.name?.toLowerCase() || '';
+    } else {
+      aValue = a.createdAt || '';
+      bValue = b.createdAt || '';
+    }
+    if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
   });
 
   // Reset all filters
@@ -115,6 +174,68 @@ const Users = () => {
   // Count active filters
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
+  const createMutation = useMutation({
+    mutationFn: createUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setModalOpen(false);
+      setForm({ name: '', email: '', status: 'active', phone: '' });
+      toast({ title: 'User created' });
+    },
+    onError: (e) => toast({ title: 'Error', description: e.message }),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: updateUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setModalOpen(false);
+      setEditUser(null);
+      setForm({ name: '', email: '', status: 'active', phone: '' });
+      toast({ title: 'User updated' });
+    },
+    onError: (e) => toast({ title: 'Error', description: e.message }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setDeleteId(null);
+      toast({ title: 'User deleted' });
+    },
+    onError: (e) => toast({ title: 'Error', description: e.message }),
+  });
+
+  const openAdd = () => {
+    setEditUser(null);
+    setForm({ name: '', email: '', status: 'active', phone: '' });
+    setModalOpen(true);
+  };
+  const openEdit = (user) => {
+    setEditUser(user);
+    setForm({ name: user.name, email: user.email, status: user.status, phone: user.phone || '' });
+    setModalOpen(true);
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (editUser) {
+      updateMutation.mutate({ id: editUser.id, ...form });
+    } else {
+      createMutation.mutate(form);
+    }
+  };
+  const handleDelete = (id) => setDeleteId(id);
+  const confirmDelete = () => deleteMutation.mutate(deleteId);
+
+  // Add loading and error UI
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-64">Loading users...</div>;
+  }
+  if (error) {
+    return <div className="flex justify-center items-center h-64 text-red-500">Error loading users: {error.message}</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4">
@@ -128,150 +249,80 @@ const Users = () => {
               className="pl-8"
             />
           </div>
-          <div className="flex gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <span>Filters</span>
-                  {activeFilterCount > 0 && (
-                    <Badge className="ml-1 bg-primary h-5 w-5 p-0 flex items-center justify-center rounded-full">
-                      {activeFilterCount}
-                    </Badge>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-80">
-                <DropdownMenuLabel>Filter Users</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup className="p-2 space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="filter-email" className="text-xs">Email contains</Label>
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="filter-email"
-                        placeholder="Filter by email"
-                        value={filters.email}
-                        onChange={(e) => setFilters({ ...filters, email: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="filter-product" className="text-xs">Subscribed to product</Label>
-                    <Select
-                      value={filters.product}
-                      onValueChange={(value) => setFilters({ ...filters, product: value })}
-                    >
-                      <SelectTrigger id="filter-product">
-                        <SelectValue placeholder="Select product" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All products</SelectItem>
-                        {products.map((product) => (
-                          <SelectItem key={product} value={product}>
-                            {product}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="filter-phone" className="text-xs">Phone number contains</Label>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="filter-phone"
-                        placeholder="Filter by phone"
-                        value={filters.phone}
-                        onChange={(e) => setFilters({ ...filters, phone: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="filter-status" className="text-xs">Status</Label>
-                    <Select
-                      value={filters.status}
-                      onValueChange={(value) => setFilters({ ...filters, status: value })}
-                    >
-                      <SelectTrigger id="filter-status">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All statuses</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="pt-2">
-                    <Button
-                      variant="outline"
-                      onClick={resetFilters}
-                      className="w-full"
-                      disabled={!activeFilterCount}
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Reset Filters
-                    </Button>
-                  </div>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="shrink-0">
-                  <Plus className="mr-2 h-4 w-4" /> Add User
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add New User</DialogTitle>
-                  <DialogDescription>
-                    Enter the details for the new user.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="name" className="text-right">
-                      Name
-                    </Label>
-                    <Input id="name" className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="email" className="text-right">
-                      Email
-                    </Label>
-                    <Input id="email" className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="status" className="text-right">
-                      Status
-                    </Label>
-                    <select
-                      id="status"
-                      className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </select>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit">Save User</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
         </div>
-
+        {/* Filter Bar (replaces DropdownMenu) */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <div className="relative w-40">
+            <Label htmlFor="filter-email" className="text-xs absolute left-2 top-1">Email</Label>
+            <Input
+              id="filter-email"
+              placeholder="Filter by email"
+              value={filters.email}
+              onChange={(e) => setFilters({ ...filters, email: e.target.value })}
+              className="mt-5"
+            />
+          </div>
+          <div className="relative w-40">
+            <Label htmlFor="filter-product" className="text-xs absolute left-2 top-1">Product</Label>
+            <Select
+              value={filters.product}
+              onValueChange={(value) => setFilters({ ...filters, product: value })}
+            >
+              <SelectTrigger id="filter-product" className="mt-5">
+                <SelectValue placeholder="Select product" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All products</SelectItem>
+                {products.map((product) => (
+                  <SelectItem key={product} value={product}>
+                    {product}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="relative w-40">
+            <Label htmlFor="filter-phone" className="text-xs absolute left-2 top-1">Phone</Label>
+            <Input
+              id="filter-phone"
+              placeholder="Filter by phone"
+              value={filters.phone}
+              onChange={(e) => setFilters({ ...filters, phone: e.target.value })}
+              className="mt-5"
+            />
+          </div>
+          <div className="relative w-40">
+            <Label htmlFor="filter-status" className="text-xs absolute left-2 top-1">Status</Label>
+            <Select
+              value={filters.status}
+              onValueChange={(value) => setFilters({ ...filters, status: value })}
+            >
+              <SelectTrigger id="filter-status" className="mt-5">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            variant="outline"
+            onClick={resetFilters}
+            className="h-10 mt-5"
+            disabled={!activeFilterCount}
+          >
+            <X className="mr-2 h-4 w-4" />
+            Reset Filters
+          </Button>
+        </div>
         {/* Filter chips/tags display */}
         {activeFilterCount > 0 && (
           <div className="flex flex-wrap gap-2 pt-2">
             {filters.email && (
               <Badge variant="outline" className="flex items-center gap-1 px-2 py-1">
-                <Mail className="h-3 w-3" />
+                <CheckCheck className="h-3 w-3" />
                 Email: {filters.email}
                 <X 
                   className="h-3 w-3 ml-1 cursor-pointer" 
@@ -291,7 +342,7 @@ const Users = () => {
             )}
             {filters.phone && (
               <Badge variant="outline" className="flex items-center gap-1 px-2 py-1">
-                <Phone className="h-3 w-3" />
+                <CheckCheck className="h-3 w-3" />
                 Phone: {filters.phone}
                 <X 
                   className="h-3 w-3 ml-1 cursor-pointer" 
@@ -301,7 +352,7 @@ const Users = () => {
             )}
             {filters.status && (
               <Badge variant="outline" className="flex items-center gap-1 px-2 py-1">
-                <User className="h-3 w-3" />
+                <CheckCheck className="h-3 w-3" />
                 Status: {filters.status}
                 <X 
                   className="h-3 w-3 ml-1 cursor-pointer" 
@@ -312,27 +363,26 @@ const Users = () => {
           </div>
         )}
       </div>
-
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>User</TableHead>
+              <TableHead><UserIcon className="inline mr-1 h-4 w-4" />User</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Last Login</TableHead>
+              <TableHead><Calendar className="inline mr-1 h-4 w-4" />Created</TableHead>
+              <TableHead><Calendar className="inline mr-1 h-4 w-4" />Last Login</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredUsers.length === 0 ? (
+            {sortedUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
                   No users found
                 </TableCell>
               </TableRow>
             ) : (
-              filteredUsers.map((user) => (
+              sortedUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -368,9 +418,8 @@ const Users = () => {
                   <TableCell>{formatDate(user.createdAt)}</TableCell>
                   <TableCell>{formatDate(user.lastLogin)}</TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm" variant="outline">
-                      Edit
-                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => openEdit(user)}><Pencil className="h-4 w-4 mr-1" />Edit</Button>
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(user.id)}><Trash2 className="h-4 w-4 mr-1" />Delete</Button>
                   </TableCell>
                 </TableRow>
               ))

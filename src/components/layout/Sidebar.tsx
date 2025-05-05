@@ -1,22 +1,33 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "./SidebarProvider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Mail, Package, Bell, Users, Package2, BarChart3 } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 
 const NAV_ITEMS = [
   { name: "Dashboard", path: "/", icon: BarChart3 },
   { name: "Users", path: "/users", icon: Users },
+  { name: "Roles & Permissions", path: "/roles", icon: Users },
+  { name: "Organizations", path: "/organizations", icon: Users },
   { name: "Products", path: "/products", icon: Package },
   { name: "Subscriptions", path: "/subscriptions", icon: Package2 },
+  { name: "Invoices", path: "/invoices", icon: Package2 },
   { name: "SMS Notifications", path: "/sms-notifications", icon: Mail },
   { name: "Push Notifications", path: "/push-notifications", icon: Bell },
+  { name: "Notification Deliveries", path: "/notification-deliveries", icon: Mail },
+  { name: "Product Usage", path: "/product-usage", icon: BarChart3 },
+  { name: "Audit Logs", path: "/audit-logs", icon: BarChart3 },
 ];
 
 const Sidebar = () => {
   const { collapsed, toggleSidebar } = useSidebar();
   const location = useLocation();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.replace('/signin');
+  };
 
   return (
     <div
@@ -28,7 +39,7 @@ const Sidebar = () => {
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         {!collapsed && (
           <div className="text-xl font-bold text-sidebar-foreground">
-            SaaS Nexus
+            Vulero
           </div>
         )}
         <Button
@@ -100,6 +111,7 @@ const Sidebar = () => {
       <div className="p-4 border-t border-sidebar-border">
         <Button
           variant="outline"
+          onClick={handleLogout}
           className={cn(
             "w-full justify-start gap-3 bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
             collapsed && "justify-center"

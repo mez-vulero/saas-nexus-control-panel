@@ -1,9 +1,8 @@
-
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import { SidebarProvider } from "./SidebarProvider";
+import { SidebarProvider, useSidebar } from "./SidebarProvider";
 import { cn } from "@/lib/utils";
 
 const TITLES: Record<string, string> = {
@@ -15,7 +14,8 @@ const TITLES: Record<string, string> = {
   "/push-notifications": "Push Notifications",
 };
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
+const LayoutContent = ({ children }: { children: React.ReactNode }) => {
+  const { collapsed } = useSidebar();
   const location = useLocation();
   const title = TITLES[location.pathname] || "Not Found";
 
@@ -25,23 +25,27 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   }, [location]);
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen bg-background">
-        <Sidebar />
-        <div className="flex flex-col">
-          <Header title={title} />
-          <main
-            className={cn(
-              "flex-1 transition-all duration-300 p-4 md:p-6",
-              "lg:ml-16"
-            )}
-          >
-            {children}
-          </main>
-        </div>
+    <div className="min-h-screen bg-background">
+      <Sidebar />
+      <div className="flex flex-col">
+        <Header title={title} />
+        <main
+          className={cn(
+            "flex-1 transition-all duration-300 p-4 md:p-6",
+            collapsed ? "lg:ml-16" : "lg:ml-64"
+          )}
+        >
+          {children}
+        </main>
       </div>
-    </SidebarProvider>
+    </div>
   );
 };
+
+const Layout = ({ children }: { children: React.ReactNode }) => (
+  <SidebarProvider>
+    <LayoutContent>{children}</LayoutContent>
+  </SidebarProvider>
+);
 
 export default Layout;

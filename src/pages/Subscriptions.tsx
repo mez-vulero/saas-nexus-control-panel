@@ -1,4 +1,3 @@
-
 import { subscriptions } from "@/mock/mockData";
 import {
   Table,
@@ -30,6 +29,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Search, Filter, CheckCheck, X } from "lucide-react";
 import { useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("en-US", {
@@ -66,20 +66,16 @@ const Subscriptions = () => {
         sub.productName.toLowerCase().includes(searchTerm.toLowerCase());
       
       // Product filter
-      const matchesProduct = !filters.product || 
-        sub.productName === filters.product;
+      const matchesProduct = filters.product === "all" || !filters.product || sub.productName === filters.product;
       
       // Plan filter
-      const matchesPlan = !filters.plan || 
-        sub.plan === filters.plan;
+      const matchesPlan = filters.plan === "all" || !filters.plan || sub.plan === filters.plan;
       
       // Status filter
-      const matchesStatus = !filters.status || 
-        sub.status === filters.status;
+      const matchesStatus = filters.status === "all" || !filters.status || sub.status === filters.status;
       
       // Interval filter
-      const matchesInterval = !filters.interval || 
-        sub.interval === filters.interval;
+      const matchesInterval = filters.interval === "all" || !filters.interval || sub.interval === filters.interval;
 
       return matchesSearch && matchesProduct && matchesPlan && matchesStatus && matchesInterval;
     }
@@ -141,114 +137,95 @@ const Subscriptions = () => {
               className="pl-8"
             />
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                <span>Filters</span>
-                {activeFilterCount > 0 && (
-                  <Badge className="ml-1 bg-primary h-5 w-5 p-0 flex items-center justify-center rounded-full">
-                    {activeFilterCount}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80">
-              <DropdownMenuLabel>Filter Subscriptions</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup className="p-2 space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="filter-product" className="text-xs">Product</Label>
-                  <Select
-                    value={filters.product}
-                    onValueChange={(value) => setFilters({ ...filters, product: value })}
-                  >
-                    <SelectTrigger id="filter-product">
-                      <SelectValue placeholder="Select product" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All products</SelectItem>
-                      {products.map((product) => (
-                        <SelectItem key={product} value={product}>
-                          {product}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="filter-plan" className="text-xs">Plan</Label>
-                  <Select
-                    value={filters.plan}
-                    onValueChange={(value) => setFilters({ ...filters, plan: value })}
-                  >
-                    <SelectTrigger id="filter-plan">
-                      <SelectValue placeholder="Select plan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All plans</SelectItem>
-                      {plans.map((plan) => (
-                        <SelectItem key={plan} value={plan}>
-                          {plan}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="filter-status" className="text-xs">Status</Label>
-                  <Select
-                    value={filters.status}
-                    onValueChange={(value) => setFilters({ ...filters, status: value })}
-                  >
-                    <SelectTrigger id="filter-status">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All statuses</SelectItem>
-                      {statuses.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="filter-interval" className="text-xs">Billing Interval</Label>
-                  <Select
-                    value={filters.interval}
-                    onValueChange={(value) => setFilters({ ...filters, interval: value })}
-                  >
-                    <SelectTrigger id="filter-interval">
-                      <SelectValue placeholder="Select interval" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All intervals</SelectItem>
-                      {intervals.map((interval) => (
-                        <SelectItem key={interval} value={interval}>
-                          {interval}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="pt-2">
-                  <Button
-                    variant="outline"
-                    onClick={resetFilters}
-                    className="w-full"
-                    disabled={!activeFilterCount}
-                  >
-                    <X className="mr-2 h-4 w-4" />
-                    Reset Filters
-                  </Button>
-                </div>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
-
+        {/* Filter Bar (replaces DropdownMenu) */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <div className="relative w-40">
+            <Label htmlFor="filter-product" className="text-xs absolute left-2 top-1">Product</Label>
+            <Select
+              value={filters.product}
+              onValueChange={(value) => setFilters({ ...filters, product: value })}
+            >
+              <SelectTrigger id="filter-product" className="mt-5">
+                <SelectValue placeholder="Select product" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All products</SelectItem>
+                {products.map((product) => (
+                  <SelectItem key={product} value={product}>
+                    {product}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="relative w-40">
+            <Label htmlFor="filter-plan" className="text-xs absolute left-2 top-1">Plan</Label>
+            <Select
+              value={filters.plan}
+              onValueChange={(value) => setFilters({ ...filters, plan: value })}
+            >
+              <SelectTrigger id="filter-plan" className="mt-5">
+                <SelectValue placeholder="Select plan" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All plans</SelectItem>
+                {plans.map((plan) => (
+                  <SelectItem key={plan} value={plan}>
+                    {plan}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="relative w-40">
+            <Label htmlFor="filter-status" className="text-xs absolute left-2 top-1">Status</Label>
+            <Select
+              value={filters.status}
+              onValueChange={(value) => setFilters({ ...filters, status: value })}
+            >
+              <SelectTrigger id="filter-status" className="mt-5">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {statuses.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="relative w-40">
+            <Label htmlFor="filter-interval" className="text-xs absolute left-2 top-1">Interval</Label>
+            <Select
+              value={filters.interval}
+              onValueChange={(value) => setFilters({ ...filters, interval: value })}
+            >
+              <SelectTrigger id="filter-interval" className="mt-5">
+                <SelectValue placeholder="Select interval" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All intervals</SelectItem>
+                {intervals.map((interval) => (
+                  <SelectItem key={interval} value={interval}>
+                    {interval}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            variant="outline"
+            onClick={resetFilters}
+            className="h-10 mt-5"
+            disabled={!activeFilterCount}
+          >
+            <X className="mr-2 h-4 w-4" />
+            Reset Filters
+          </Button>
+        </div>
         {/* Filter chips/tags display */}
         {activeFilterCount > 0 && (
           <div className="flex flex-wrap gap-2 pt-2">

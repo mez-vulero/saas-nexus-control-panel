@@ -1,4 +1,3 @@
-
 import { smsNotifications, products } from "@/mock/mockData";
 import {
   Table,
@@ -66,16 +65,13 @@ const SMSNotifications = () => {
         notification.productName.toLowerCase().includes(searchTerm.toLowerCase());
       
       // Product filter
-      const matchesProduct = !filters.product || 
-        notification.productName === filters.product;
+      const matchesProduct = filters.product === "all" || !filters.product || notification.productName === filters.product;
       
       // Type filter
-      const matchesType = !filters.type || 
-        notification.type === filters.type;
+      const matchesType = filters.type === "all" || !filters.type || notification.type === filters.type;
       
       // Status filter
-      const matchesStatus = !filters.status || 
-        notification.status === filters.status;
+      const matchesStatus = filters.status === "all" || !filters.status || notification.status === filters.status;
 
       return matchesSearch && matchesProduct && matchesType && matchesStatus;
     }
@@ -136,177 +132,76 @@ const SMSNotifications = () => {
               className="pl-8"
             />
           </div>
-          <div className="flex gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <span>Filters</span>
-                  {activeFilterCount > 0 && (
-                    <Badge className="ml-1 bg-primary h-5 w-5 p-0 flex items-center justify-center rounded-full">
-                      {activeFilterCount}
-                    </Badge>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-80">
-                <DropdownMenuLabel>Filter SMS Notifications</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup className="p-2 space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="filter-product" className="text-xs">Product</Label>
-                    <Select
-                      value={filters.product}
-                      onValueChange={(value) => setFilters({ ...filters, product: value })}
-                    >
-                      <SelectTrigger id="filter-product">
-                        <SelectValue placeholder="Select product" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All products</SelectItem>
-                        {productNames.map((product) => (
-                          <SelectItem key={product} value={product}>
-                            {product}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="filter-type" className="text-xs">Type</Label>
-                    <Select
-                      value={filters.type}
-                      onValueChange={(value) => setFilters({ ...filters, type: value })}
-                    >
-                      <SelectTrigger id="filter-type">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All types</SelectItem>
-                        {types.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="filter-status" className="text-xs">Status</Label>
-                    <Select
-                      value={filters.status}
-                      onValueChange={(value) => setFilters({ ...filters, status: value })}
-                    >
-                      <SelectTrigger id="filter-status">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All statuses</SelectItem>
-                        {statuses.map((status) => (
-                          <SelectItem key={status} value={status}>
-                            {status}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="pt-2">
-                    <Button
-                      variant="outline"
-                      onClick={resetFilters}
-                      className="w-full"
-                      disabled={!activeFilterCount}
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Reset Filters
-                    </Button>
-                  </div>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="shrink-0">
-                  <Plus className="mr-2 h-4 w-4" /> Create SMS
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[525px]">
-                <DialogHeader>
-                  <DialogTitle>Create SMS Notification</DialogTitle>
-                  <DialogDescription>
-                    Send an SMS notification to your users.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="product" className="text-right">
-                      Product
-                    </Label>
-                    <select
-                      id="product"
-                      className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      {products.map((product) => (
-                        <option key={product.id} value={product.id}>
-                          {product.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="type" className="text-right">
-                      Type
-                    </Label>
-                    <select
-                      id="type"
-                      className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <option value="announcement">Announcement</option>
-                      <option value="update">Update</option>
-                      <option value="maintenance">Maintenance</option>
-                      <option value="security">Security</option>
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="title" className="text-right">
-                      Title
-                    </Label>
-                    <Input id="title" className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="message" className="text-right">
-                      Message
-                    </Label>
-                    <Textarea 
-                      id="message" 
-                      className="col-span-3 resize-none" 
-                      placeholder="SMS message content..."
-                      rows={4}
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="status" className="text-right">
-                      Status
-                    </Label>
-                    <select
-                      id="status"
-                      className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="scheduled">Schedule</option>
-                      <option value="sent">Send Now</option>
-                    </select>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit">Create</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
         </div>
-        
+        {/* Filter Bar (replaces DropdownMenu) */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <div className="relative w-40">
+            <Label htmlFor="filter-product" className="text-xs absolute left-2 top-1">Product</Label>
+            <Select
+              value={filters.product}
+              onValueChange={(value) => setFilters({ ...filters, product: value })}
+            >
+              <SelectTrigger id="filter-product" className="mt-5">
+                <SelectValue placeholder="Select product" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All products</SelectItem>
+                {productNames.map((product) => (
+                  <SelectItem key={product} value={product}>
+                    {product}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="relative w-40">
+            <Label htmlFor="filter-type" className="text-xs absolute left-2 top-1">Type</Label>
+            <Select
+              value={filters.type}
+              onValueChange={(value) => setFilters({ ...filters, type: value })}
+            >
+              <SelectTrigger id="filter-type" className="mt-5">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All types</SelectItem>
+                {types.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="relative w-40">
+            <Label htmlFor="filter-status" className="text-xs absolute left-2 top-1">Status</Label>
+            <Select
+              value={filters.status}
+              onValueChange={(value) => setFilters({ ...filters, status: value })}
+            >
+              <SelectTrigger id="filter-status" className="mt-5">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {statuses.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            variant="outline"
+            onClick={resetFilters}
+            className="h-10 mt-5"
+            disabled={!activeFilterCount}
+          >
+            <X className="mr-2 h-4 w-4" />
+            Reset Filters
+          </Button>
+        </div>
         {/* Filter chips/tags display */}
         {activeFilterCount > 0 && (
           <div className="flex flex-wrap gap-2 pt-2">
@@ -344,7 +239,7 @@ const SMSNotifications = () => {
         )}
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
